@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    command: rails server -b '0.0.0.0'
+    volumes:
+      - .:/app
+    ports:
+      - "${COMPOSE_PORT:-3000}:3000"
+    env_file:
+      - .env
