@@ -27,7 +27,11 @@ module App
     config.active_job.queue_adapter = :sidekiq
 
     config.after_initialize do
-      Thread.new { TelegramBotService.listen }
+      Thread.new do
+        Rails.application.reloader.wrap do
+          TelegramBotService.listen
+        end
+      end
     end
   end
 end
