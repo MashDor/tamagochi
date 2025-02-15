@@ -5,6 +5,7 @@ class Pet < ApplicationRecord
 
   attribute :satiety, :integer, default: 50
   attribute :last_fed_at, :datetime, default: Time.now
+  attribute :alive, :boolean, default: true
 
   DECREASE_SATIETY_PER_MINUTE = 1
   SATIETY_FOR_REMINDER = 10
