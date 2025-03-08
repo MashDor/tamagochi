@@ -7,19 +7,21 @@ class Pet < ApplicationRecord
   validates :satiety, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
 
   attribute :satiety, :integer, default: 50
-  attribute :last_fed_at, :datetime, default: Time.now
+  attribute :last_fed_at, :datetime
   attribute :alive, :boolean, default: true
 
   DECREASE_SATIETY_PER_MINUTE = 1
-  SATIETY_FOR_REMINDER = 10
+  SATIETY_FOR_NOTIFICATION = 10
 
   def current_satiety
-    minutes_passed = ((Time.now - last_fed_at) / 60).to_i
-    [satiety - minutes_passed * DECREASE_SATIETY_PER_MINUTE, 0].max
+    seconds_passed = ((Time.now - last_fed_at)).to_i
+    [satiety - seconds_passed * Pet::DECREASE_SATIETY_PER_MINUTE / 60, 0].max
   end
 
   def feed(increase_satiety = 10)
-    update!(satiety: current_satiety + increase_satiety)
+
+
+    update!(satiety: [current_satiety + increase_satiety, 100].min)
     update!(last_fed_at: Time.now)
 
     schedule_low_satiety_notification()
@@ -27,21 +29,21 @@ class Pet < ApplicationRecord
   end
 
   def schedule_low_satiety_notification
-    if current_satiety > SATIETY_FOR_NOTIFICATION
-      job = LowSatietyNotificationJob.set(wait: ((current_satiety - SATIETY_FOR_NOTIFICATION) / DECREASE_SATIETY_PER_MINUTE).minute).perform_later(self)
-      p job
+    if current_satiety > Pet::SATIETY_FOR_NOTIFICATION
+      minutes_to_notification = ((current_satiety - Pet::SATIETY_FOR_NOTIFICATION).fdiv(Pet::DECREASE_SATIETY_PER_MINUTE)).minute
+      LowSatietyNotificationJob.set(wait: minutes_to_notification).perform_later(self.id)
     end
   end
 
   def low_satiety_notification
-    return if current_satiety > SATIETY_FOR_NOTIFICATION
+    return if current_satiety > Pet::SATIETY_FOR_NOTIFICATION
 
     bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    bot.api.send_message(chat_id: user.telegram_id, text: "Питомец проголодался 😞 Сытость #{current_satiety}%", parse_mode: 'Markdown')
+    bot.api.send_message(chat_id: user.telegram_id, text: "Питомец проголодался 😞 Сытость #{Pet::SATIETY_FOR_NOTIFICATION}%", parse_mode: 'Markdown')
   end
 
   def schedule_death
-    job = DeathJob.set(wait: (current_satiety / DECREASE_SATIETY_PER_MINUTE).minute).perform_later(self)
+    job = DeathJob.set(wait: (current_satiety.fdiv(Pet::DECREASE_SATIETY_PER_MINUTE)).minute).perform_later(self.id)
   end
 
   def death

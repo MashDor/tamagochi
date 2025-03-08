@@ -15,6 +15,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_10_224806) do
     t.integer "satiety", default: 50
     t.datetime "last_fed_at", default: -> { "CURRENT_TIMESTAMP" }
     t.integer "user_id", null: false
+    t.boolean "alive", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_pets_on_user_id"

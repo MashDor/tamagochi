@@ -1,8 +1,8 @@
 class DeathJob < ApplicationJob
   queue_as :default
 
-  def perform(pet)
-    pet.death
+  def perform(id)
+    Pet.find(id).death
   end
 end
 

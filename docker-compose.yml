@@ -25,6 +25,8 @@ services:
       - redis
     environment:
       REDIS_URL: redis://redis:6379/0
+    env_file:
+      - .env
 
   redis:
     image: redis:latest
