@@ -28,9 +28,7 @@ module App
 
     config.after_initialize do
       Thread.new do
-        Rails.application.reloader.wrap do
-          TelegramBotService.listen
-        end
+        TelegramBotService.listen
       end
     end
   end
