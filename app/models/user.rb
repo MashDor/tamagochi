@@ -2,6 +2,6 @@ class User < ApplicationRecord
   has_many :pets, dependent: :destroy
 
   def current_pet
-    pets.find(&:alive)
+    pets.last if pets.last.alive
   end
 end

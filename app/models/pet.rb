@@ -38,8 +38,10 @@ class Pet < ApplicationRecord
   def low_satiety_notification
     return if current_satiety > Pet::SATIETY_FOR_NOTIFICATION
 
-    bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    bot.api.send_message(chat_id: user.telegram_id, text: "Питомец проголодался 😞 Сытость #{Pet::SATIETY_FOR_NOTIFICATION}%", parse_mode: 'Markdown')
+    Telegram::BotService.send_message(
+      user.telegram_id,
+      "Питомец проголодался 😞 Сытость #{Pet::SATIETY_FOR_NOTIFICATION}%"
+    )
   end
 
   def schedule_death
@@ -47,12 +49,15 @@ class Pet < ApplicationRecord
   end
 
   def death
-    return if current_satiety != 0
+    return unless current_satiety.zero?
 
     update!(alive: false)
 
-    bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    bot.api.send_message(chat_id: user.telegram_id, text: "😭 К сожалению, ты плохо заботился о своём питомце. И его больше нет 😭\n\nТы готов завести нового питомца?", parse_mode: 'Markdown', reply_markup: TelegramBotService.start_keyboard)
+    Telegram::BotService.send_message(
+      user.telegram_id,
+      "😭 К сожалению, ты плохо заботился о своём питомце. И его больше нет 😭\n\nТы готов завести нового питомца?",
+      Telegram::BotService.start_keyboard
+    )
   end
 
   def state_message
