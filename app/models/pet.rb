@@ -10,7 +10,6 @@ class Pet < ApplicationRecord
   attribute :last_fed_at, :datetime
   attribute :alive, :boolean, default: true
 
-  before_update :handle_satiety_changed, if: :satiety_changed?
   before_update :handle_alive_changed, if: :alive_changed?
 
   DECREASE_SATIETY_PER_MINUTE = 0.17
@@ -21,11 +20,20 @@ class Pet < ApplicationRecord
 
   def current_satiety
     seconds_passed = ((Time.now - last_fed_at)).to_i
-    [(satiety - seconds_passed * Pet::DECREASE_SATIETY_PER_MINUTE / 60).ceil, Pet::MIN_SATIETY].max
+    [(satiety - seconds_passed * Pet::DECREASE_SATIETY_PER_MINUTE / 60).round, Pet::MIN_SATIETY].max
+  end
+
+  def set_satiety(value)
+    update!(satiety: value)
+
+    update!(last_fed_at: Time.now)
+
+    schedule_low_satiety_notification
+    schedule_death
   end
 
   def feed(increase_satiety = Pet::INCREASE_SATIETY)
-    update!(satiety: [current_satiety + increase_satiety, Pet::MAX_SATIETY].min)
+    set_satiety([current_satiety + increase_satiety, Pet::MAX_SATIETY].min)
   end
 
   def death
@@ -77,13 +85,6 @@ class Pet < ApplicationRecord
 
   def state_message
     "*Состояние питомца*:\n\n🍖 Сытость: #{current_satiety}%"
-  end
-
-  def handle_satiety_changed
-    update_column(:last_fed_at, Time.now)
-
-    schedule_low_satiety_notification
-    schedule_death
   end
 
   def handle_alive_changed
