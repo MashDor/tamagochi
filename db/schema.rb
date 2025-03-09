@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_10_224806) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_09_210924) do
   create_table "pets", force: :cascade do |t|
     t.integer "satiety", default: 50
     t.datetime "last_fed_at", default: -> { "CURRENT_TIMESTAMP" }
@@ -18,6 +18,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_10_224806) do
     t.boolean "alive", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "low_satiety_notification_job_id"
+    t.string "death_job_id"
     t.index ["user_id"], name: "index_pets_on_user_id"
   end
 
