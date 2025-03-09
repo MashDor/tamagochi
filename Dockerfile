@@ -13,5 +13,6 @@ RUN gem install bundler && bundle install
 # Copy the rest of the Rails app
 COPY . .
 
+RUN chmod +x entrypoint.sh
 # Start the main process (puma server by default for Rails)
-CMD ["rails", "server", "-b", "0.0.0.0"]
+
