@@ -30,6 +30,10 @@ module Telegram
         )
       end
 
+      def send_sticker(chat_id, sticker_id)
+        bot.api.send_sticker(chat_id:, sticker: sticker_id)
+      end
+
       def start_keyboard
         base_keyboard(:get_pet)
       end

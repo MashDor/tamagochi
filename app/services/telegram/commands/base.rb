@@ -22,6 +22,10 @@ module Telegram
       def send_message(text, keyboard = nil)
         Telegram::BotService.send_message(chat_id, text, keyboard)
       end
+
+      def send_sticker(sticker_id)
+        Telegram::BotService.send_sticker(chat_id, sticker_id)
+      end
     end
   end
 end
